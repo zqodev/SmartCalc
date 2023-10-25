@@ -1,4 +1,4 @@
-import math
+import numpy as np
 
 
 class OperatorPrecedence:
@@ -102,7 +102,7 @@ class PostfixEvaluator:
                     raise ValueError("Insufficient operands for operator ^")
                 exponent = stack.pop()
                 base = stack.pop()
-                stack.append(math.pow(base, exponent))
+                stack.append(np.power(base, exponent))
             else:
                 raise ValueError(f"Unknown token {token}")
 
@@ -154,29 +154,29 @@ class Calculator:
 
 
 if __name__ == '__main__':
-    default_vars = {'pi': math.pi, 'e': math.e}
+    default_vars = {'pi': np.pi, 'e': np.e}
     functions = {
-        'sin': lambda x: math.sin(math.radians(x)),
-        'cos': lambda x: math.cos(math.radians(x)),
-        'tan': lambda x: math.tan(math.radians(x)),
-        'log': lambda x: math.log(x) if x > 0 else ValueError(f"Invalid operand {x} for function log"),
-        'sqrt': lambda x: math.sqrt(x) if x >= 0 else ValueError(f"Invalid operand {x} for function sqrt"),
-        'exp': lambda x: math.exp(x),
-        'abs': lambda x: abs(x),
-        'round': lambda x: round(x),
-        'asin': lambda x: math.degrees(math.asin(x)),
-        'acos': lambda x: math.degrees(math.acos(x)),
-        'atan': lambda x: math.degrees(math.atan(x)),
-        'sinh': lambda x: math.sinh(x),
-        'cosh': lambda x: math.cosh(x),
-        'tanh': lambda x: math.tanh(x),
-        'asinh': lambda x: math.degrees(math.asinh(x)),
-        'acosh': lambda x: math.degrees(math.acosh(x)),
-        'atanh': lambda x: math.atanh(x),
-        'ceil': lambda x: math.ceil(x),
-        'floor': lambda x: math.floor(x),
-        'factorial': lambda x: math.factorial(int(x)) if x >= 0 else ValueError(f"Invalid operand {x} for function "
-                                                                                f"factorial"),
+        'sin': lambda x: np.sin(np.radians(x)),
+        'cos': lambda x: np.cos(np.radians(x)),
+        'tan': lambda x: np.tan(np.radians(x)),
+        'log': lambda x: np.log(x) if x > 0 else ValueError(f"Invalid operand {x} for function log"),
+        'sqrt': lambda x: np.sqrt(x) if x >= 0 else ValueError(f"Invalid operand {x} for function sqrt"),
+        'exp': lambda x: np.exp(x),
+        'abs': lambda x: np.abs(x),
+        'round': lambda x: np.round(x),
+        'asin': lambda x: np.degrees(np.arcsin(x)),
+        'acos': lambda x: np.degrees(np.arccos(x)),
+        'atan': lambda x: np.degrees(np.arctan(x)),
+        'sinh': lambda x: np.sinh(x),
+        'cosh': lambda x: np.cosh(x),
+        'tanh': lambda x: np.tanh(x),
+        'asinh': lambda x: np.degrees(np.arcsinh(x)),
+        'acosh': lambda x: np.degrees(np.arccosh(x)),
+        'atanh': lambda x: np.degrees(np.arctanh(x)),
+        'ceil': lambda x: np.ceil(x),
+        'floor': lambda x: np.floor(x),
+        'factorial': lambda x: np.math.factorial(int(x)) if x >= 0 else ValueError(
+            f"Invalid operand {x} for function factorial"),
     }
 
     calculator = Calculator(default_variables=default_vars, functions=functions)

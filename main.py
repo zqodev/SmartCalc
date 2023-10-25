@@ -60,15 +60,19 @@ class InfixToPostfixConverter:
 
 
 class PostfixEvaluator:
-    def __init__(self):
-        self.variables = {}
+    def __init__(self, default_variables=None):
+        self.variables = default_variables or {}
 
     def evaluate(self, postfix_tokens):
         stack = []
 
         for token in postfix_tokens:
-            if token.replace('.', '', 1).isdigit() or token.islower():
-                value = self.variables.get(token, 0) if token.islower() else float(token)
+            if token.replace('.', '', 1).isdigit():
+                stack.append(float(token))
+            elif token.islower():
+                value = self.variables.get(token, None)
+                if value is None:
+                    raise ValueError(f"Undefined variable: {token}")
                 stack.append(value)
             elif token in {'+', '-', '*', '/'}:
                 if len(stack) < 2:
@@ -101,38 +105,48 @@ class PostfixEvaluator:
 
 
 class Calculator:
-    def __init__(self):
+    def __init__(self, default_variables=None):
         self.input = ""
         self.result = 0
         self.operator_precedence = OperatorPrecedence()
         self.tokenizer = Tokenizer(self.operator_precedence.precedence.keys())
         self.converter = InfixToPostfixConverter(self.operator_precedence, self.tokenizer)
-        self.evaluator = PostfixEvaluator()
+        self.evaluator = PostfixEvaluator(default_variables)
 
     def ask(self):
-        self.input = str(input("SmartCalc > "))
-        if "=" in self.input:
-            self.handle_variable_definition()
-        else:
-            self.calc()
+        try:
+            self.input = str(input("SmartCalc > "))
+            if "=" in self.input:
+                self.handle_variable_definition()
+            else:
+                self.calc()
+        except Exception as e:
+            print(f"Error: {str(e)}")
 
     def handle_variable_definition(self):
-        variable, expression = map(str.strip, self.input.split('='))
-        infix_tokens = self.tokenizer.tokenize_generator(expression)
-        postfix_tokens = self.converter.convert(infix_tokens)
-        value = self.evaluator.evaluate(postfix_tokens)
-        self.evaluator.variables[variable] = value
-        print(f"Variable {variable} defined with value {value}")
-        self.result = value
+        try:
+            variable, expression = map(str.strip, self.input.split('='))
+            infix_tokens = self.tokenizer.tokenize_generator(expression)
+            postfix_tokens = self.converter.convert(infix_tokens)
+            value = self.evaluator.evaluate(postfix_tokens)
+            self.evaluator.variables[variable] = value
+            print(f"Variable {variable} defined with value {value}")
+            self.result = value
+        except ValueError as ve:
+            print(f"Variable definition error: {str(ve)}")
 
     def calc(self):
-        infix_tokens = self.tokenizer.tokenize_generator(self.input)
-        postfix_tokens = self.converter.convert(infix_tokens)
-        self.result = self.evaluator.evaluate(postfix_tokens)
-        print(self.result)
+        try:
+            infix_tokens = self.tokenizer.tokenize_generator(self.input)
+            postfix_tokens = self.converter.convert(infix_tokens)
+            self.result = self.evaluator.evaluate(postfix_tokens)
+            print(self.result)
+        except ValueError as ve:
+            print(f"Calculation error: {str(ve)}")
 
 
 if __name__ == '__main__':
-    calculator = Calculator()
+    default_vars = {'pi': math.pi, 'e': math.e}
+    calculator = Calculator(default_variables=default_vars)
     while True:
         calculator.ask()

@@ -11,7 +11,7 @@ class OperatorPrecedence:
 
 class Tokenizer:
     def __init__(self, operators):
-        self.operators = list(operators)
+        self.operators = list(operators) + ['sin', 'cos', 'tan', 'log']
 
     def tokenize_generator(self, expression):
         for operator in self.operators:
@@ -19,7 +19,10 @@ class Tokenizer:
         return (token for token in expression.replace('(', ' ( ').replace(')', ' ) ').split())
 
     def is_variable(self, token):
-        return token.islower()
+        return token.islower() and token not in self.operators
+
+    def is_function(self, token):
+        return token.islower() and token in {'sin', 'cos', 'tan', 'log'}
 
 
 class InfixToPostfixConverter:
@@ -33,11 +36,13 @@ class InfixToPostfixConverter:
         get_precedence = self.operator_precedence.get_precedence
 
         for token in infix_tokens:
-            if token.replace('.', '', 1).isdigit() or token.islower():
+            if token.replace('.', '', 1).isdigit() or self.tokenizer.is_variable(token):
                 output.append(token)
             elif token in self.operator_precedence.precedence:
                 while operator_stack and get_precedence(operator_stack[-1]) >= get_precedence(token):
                     output.append(operator_stack.pop())
+                operator_stack.append(token)
+            elif self.tokenizer.is_function(token):
                 operator_stack.append(token)
             elif token == '(':
                 operator_stack.append(token)
@@ -48,8 +53,6 @@ class InfixToPostfixConverter:
                     operator_stack.pop()
                 else:
                     raise ValueError("Mismatched parentheses")
-            elif self.tokenizer.is_variable(token):
-                output.append(token)
             else:
                 raise ValueError(f"Unknown token {token}")
 
@@ -69,6 +72,23 @@ class PostfixEvaluator:
         for token in postfix_tokens:
             if token.replace('.', '', 1).isdigit():
                 stack.append(float(token))
+            elif token.islower() and token in {'sin', 'cos', 'tan', 'log'}:
+                if token == 'sin':
+                    operand = stack.pop()
+                    stack.append(math.sin(math.radians(operand)))
+                elif token == 'cos':
+                    operand = stack.pop()
+                    stack.append(math.cos(math.radians(operand)))
+                elif token == 'tan':
+                    operand = stack.pop()
+                    stack.append(math.tan(math.radians(operand)))
+                elif token == 'log':
+                    if len(stack) < 1:
+                        raise ValueError(f"Insufficient operands for function {token}")
+                    operand = stack.pop()
+                    if operand <= 0:
+                        raise ValueError(f"Invalid operand {operand} for function {token}")
+                    stack.append(math.log(operand))
             elif token.islower():
                 value = self.variables.get(token, None)
                 if value is None:

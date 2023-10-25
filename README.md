@@ -46,6 +46,16 @@ OUTPUT > 0.5
 ...<br/>
 For a complete list of available functions, refer to the source code.
 
+### Examples
+
+```
+SmartCalc > x = 10 + 7
+SmartCalc > y = 28^3
+SmartCalc > x = y * 2
+SmartCalc > sin(x)
+OUTPUT > -0.27
+```
+
 ### Installation
 1. Clone this repository.
 2. Ensure you have Python installed.

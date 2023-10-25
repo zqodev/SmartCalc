@@ -10,8 +10,9 @@ class OperatorPrecedence:
 
 
 class Tokenizer:
-    def __init__(self, operators):
-        self.operators = list(operators) + ['sin', 'cos', 'tan', 'log']
+    def __init__(self, operators, functions):
+        self.operators = list(operators) + list(functions.keys())
+        self.functions = functions
 
     def tokenize_generator(self, expression):
         for operator in self.operators:
@@ -22,7 +23,7 @@ class Tokenizer:
         return token.islower() and token not in self.operators
 
     def is_function(self, token):
-        return token.islower() and token in {'sin', 'cos', 'tan', 'log'}
+        return token.islower() and token in self.functions
 
 
 class InfixToPostfixConverter:
@@ -63,8 +64,9 @@ class InfixToPostfixConverter:
 
 
 class PostfixEvaluator:
-    def __init__(self, default_variables=None):
+    def __init__(self, default_variables=None, functions=None):
         self.variables = default_variables or {}
+        self.functions = functions or {}
 
     def evaluate(self, postfix_tokens):
         stack = []
@@ -72,23 +74,9 @@ class PostfixEvaluator:
         for token in postfix_tokens:
             if token.replace('.', '', 1).isdigit():
                 stack.append(float(token))
-            elif token.islower() and token in {'sin', 'cos', 'tan', 'log'}:
-                if token == 'sin':
-                    operand = stack.pop()
-                    stack.append(math.sin(math.radians(operand)))
-                elif token == 'cos':
-                    operand = stack.pop()
-                    stack.append(math.cos(math.radians(operand)))
-                elif token == 'tan':
-                    operand = stack.pop()
-                    stack.append(math.tan(math.radians(operand)))
-                elif token == 'log':
-                    if len(stack) < 1:
-                        raise ValueError(f"Insufficient operands for function {token}")
-                    operand = stack.pop()
-                    if operand <= 0:
-                        raise ValueError(f"Invalid operand {operand} for function {token}")
-                    stack.append(math.log(operand))
+            elif token.islower() and token in self.functions:
+                operand = stack.pop()
+                stack.append(self.functions[token](operand))
             elif token.islower():
                 value = self.variables.get(token, None)
                 if value is None:
@@ -125,13 +113,13 @@ class PostfixEvaluator:
 
 
 class Calculator:
-    def __init__(self, default_variables=None):
+    def __init__(self, default_variables=None, functions=None):
         self.input = ""
         self.result = 0
         self.operator_precedence = OperatorPrecedence()
-        self.tokenizer = Tokenizer(self.operator_precedence.precedence.keys())
+        self.tokenizer = Tokenizer(self.operator_precedence.precedence.keys(), functions)
         self.converter = InfixToPostfixConverter(self.operator_precedence, self.tokenizer)
-        self.evaluator = PostfixEvaluator(default_variables)
+        self.evaluator = PostfixEvaluator(default_variables, functions)
 
     def ask(self):
         try:
@@ -167,6 +155,17 @@ class Calculator:
 
 if __name__ == '__main__':
     default_vars = {'pi': math.pi, 'e': math.e}
-    calculator = Calculator(default_variables=default_vars)
+    functions = {
+        'sin': lambda x: math.sin(math.radians(x)),
+        'cos': lambda x: math.cos(math.radians(x)),
+        'tan': lambda x: math.tan(math.radians(x)),
+        'log': lambda x: math.log(x) if x > 0 else ValueError(f"Invalid operand {x} for function log"),
+        'sqrt': lambda x: math.sqrt(x) if x >= 0 else ValueError(f"Invalid operand {x} for function sqrt"),
+        'exp': lambda x: math.exp(x),
+        'abs': lambda x: abs(x),
+        'round': lambda x: round(x)
+    }
+
+    calculator = Calculator(default_variables=default_vars, functions=functions)
     while True:
         calculator.ask()

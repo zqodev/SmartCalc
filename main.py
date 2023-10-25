@@ -163,7 +163,20 @@ if __name__ == '__main__':
         'sqrt': lambda x: math.sqrt(x) if x >= 0 else ValueError(f"Invalid operand {x} for function sqrt"),
         'exp': lambda x: math.exp(x),
         'abs': lambda x: abs(x),
-        'round': lambda x: round(x)
+        'round': lambda x: round(x),
+        'asin': lambda x: math.degrees(math.asin(x)),
+        'acos': lambda x: math.degrees(math.acos(x)),
+        'atan': lambda x: math.degrees(math.atan(x)),
+        'sinh': lambda x: math.sinh(x),
+        'cosh': lambda x: math.cosh(x),
+        'tanh': lambda x: math.tanh(x),
+        'asinh': lambda x: math.degrees(math.asinh(x)),
+        'acosh': lambda x: math.degrees(math.acosh(x)),
+        'atanh': lambda x: math.atanh(x),
+        'ceil': lambda x: math.ceil(x),
+        'floor': lambda x: math.floor(x),
+        'factorial': lambda x: math.factorial(int(x)) if x >= 0 else ValueError(f"Invalid operand {x} for function "
+                                                                                f"factorial"),
     }
 
     calculator = Calculator(default_variables=default_vars, functions=functions)

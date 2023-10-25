@@ -59,7 +59,8 @@ OUTPUT > -0.27
 ### Installation
 1. Clone this repository.
 2. Ensure you have Python installed.
-3. Run the calculator:
+3. Install the dependencies: `numpy`
+4. Run the calculator:
 ```bash
 python main.py
 ```
